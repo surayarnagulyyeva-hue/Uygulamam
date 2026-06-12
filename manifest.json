@@ -10,13 +10,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "ikon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/icon-512-1.png",
+      "src": "ikon-512-1.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -24,11 +24,11 @@
   ],
   "screenshots": [
     {
-      "src": "screenshots/mobile.png",
-      "sizes": "711×1310",
+      "src": "screenshots/mobile.jpg",
+      "sizes": "711x1310",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Defter Uygulaması Mobil Görünümü"
     }
-  ]
+  
   
