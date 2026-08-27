@@ -1,310 +1,224 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Hayat Defteri</title>
-
-<style>
-body{
-background:#dfffd6;
-font-family:Arial,sans-serif;
-max-width:900px;
-margin:auto;
-padding:20px;
-}
-
-h1{
-text-align:center;
-color:#2e7d32;
-}
-
-.kutu{
-background:white;
-padding:15px;
-margin-top:15px;
-border-radius:10px;
-}
-
-input,textarea,select{
-width:100%;
-padding:10px;
-margin-top:10px;
-box-sizing:border-box;
-}
-
-button{
-padding:10px 15px;
-margin-top:10px;
-cursor:pointer;
-}
-
-.hidden{
-display:none;
-}
-</style>
-
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
-  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dilek Kavanozu</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0c29">
+<link rel="stylesheet" href="style-5.css">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<h1>🌿 Hayat Defteri</h1>
-
-<div id="loginBox" class="kutu">
-<h3>Şifre Belirle / Giriş Yap</h3>
-
-<input type="password" id="sifre">
-
-<button onclick="giris()">Giriş</button>
-
-<p id="hata"></p>
+<!-- 🌟 HOŞGELDİN EKRANI -->
+<div id="welcomeScreen" class="screen active">
+  <div class="stars-bg"></div>
+  <div class="welcome-content">
+    <div class="jar-icon">🫙</div>
+    <h1>Dilek Kavanozu</h1>
+    <p class="welcome-sub">İçindeki dilekleri yıldızlara gönder.<br>Sadece sen ve kavanozun.</p>
+    <button id="startBtn" class="btn-magic">✨ Kavanozunu Aç</button>
+    <p class="welcome-hint">Tüm verilerin cihazında kalır, hiçbir yere gönderilmez.</p>
+  </div>
 </div>
 
-<div id="app" class="hidden">
-
-<div class="kutu">
-<h2>📅 Tarih</h2>
-<input type="date" id="tarih">
+<!-- 🔐 KİLİT EKRANI (varsa) -->
+<div id="lockScreen" class="screen hidden">
+  <div class="stars-bg"></div>
+  <div class="lock-content">
+    <div class="jar-icon small">🔒</div>
+    <h2>Kavanozun Kilitli</h2>
+    <input type="password" id="pinInput" inputmode="numeric" maxlength="6" placeholder="PIN Kodun">
+    <button id="pinSubmit" class="btn-magic">Aç</button>
+    <p id="pinError" class="error-text hidden">Yanlış PIN</p>
+  </div>
 </div>
 
-<div class="kutu">
-<h2>📝 Günlük</h2>
+<!-- 🏠 ANA UYGULAMA -->
+<div id="app" class="screen hidden">
+  <div class="stars-bg"></div>
+  
+  <header class="top-bar">
+    <div class="logo-small">🫙 Dilek Kavanozu</div>
+    <button id="menuBtn" class="icon-btn">☰</button>
+  </header>
 
-<textarea id="gunluk" rows="6"></textarea>
+  <main class="main-content">
+    
+    <div id="luckyStarCard" class="lucky-star hidden">
+      <div class="lucky-label">⭐ Bugünün Şans Yıldızı</div>
+      <p id="luckyText"></p>
+      <button id="luckyClose" class="btn-small">Kapat</button>
+    </div>
 
-<select id="ruh">
-<option>😄 Çok iyi</option>
-<option>🙂 İyi</option>
-<option>😐 Normal</option>
-<option>😔 Kötü</option>
-</select>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span id="statTotal" class="stat-num">0</span>
+        <span class="stat-label">Dilek</span>
+      </div>
+      <div class="stat-item">
+        <span id="statDone" class="stat-num">0</span>
+        <span class="stat-label">Gerçekleşti</span>
+      </div>
+      <div class="stat-item">
+        <span id="statStreak" class="stat-num">0</span>
+        <span class="stat-label">Günlük Seri</span>
+      </div>
+    </div>
 
-<button onclick="kaydet()">Kaydet</button>
+    <div class="hero-buttons">
+      <button id="wishBtn" class="btn-giant">
+        <span class="giant-icon">✨</span>
+        <span class="giant-text">Dilek Dile</span>
+        <span class="giant-sub">Yeni bir dilek kavanoza ekle</span>
+      </button>
+      
+      <button id="motivationBtn" class="btn-giant secondary">
+        <span class="giant-icon">💫</span>
+        <span class="giant-text">Motivasyon Sözleri</span>
+        <span class="giant-sub">Bugün sana ne söylenmeli?</span>
+      </button>
+    </div>
+
+    <div class="section-header">
+      <h3>🫙 Kavanozundaki Dilekler</h3>
+      <div class="filter-row">
+        <select id="categoryFilter">
+          <option value="all">Tümü</option>
+          <option value="love">💕 Aşk</option>
+          <option value="money">💰 Para</option>
+          <option value="health">🏥 Sağlık</option>
+          <option value="career">🚀 Kariyer</option>
+          <option value="family">👨‍👩‍👧 Aile</option>
+          <option value="growth">🌟 Kişisel Gelişim</option>
+          <option value="surprise">🎁 Sürpriz</option>
+        </select>
+        <button id="luckyStarBtn" class="btn-small glow">🎲 Şans Yıldızı</button>
+      </div>
+    </div>
+
+    <div id="wishList" class="wish-list"></div>
+    <div id="emptyWishes" class="empty-state">
+      <div class="empty-jar">🫙</div>
+      <p>Kavanozun henüz boş.</p>
+      <p class="empty-sub">Yukarıdaki büyük butondan ilk dileğini ekle!</p>
+    </div>
+  </main>
 </div>
 
-<div class="kutu">
-<h2>🎯 Hedefler</h2>
-
-<input id="hedefInput">
-
-<button onclick="hedefEkle()">Hedef Ekle</button>
-
-<ul id="hedefListe"></ul>
+<!-- 📝 DİLEK EKLEME MODALI -->
+<div id="wishModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="closeWishModal">×</button>
+    <h2>✨ Yeni Dilek</h2>
+    
+    <div class="form-group">
+      <label>Kategorin</label>
+      <div class="category-pills">
+        <button class="pill" data-cat="love">💕 Aşk</button>
+        <button class="pill" data-cat="money">💰 Para</button>
+        <button class="pill" data-cat="health">🏥 Sağlık</button>
+        <button class="pill" data-cat="career">🚀 Kariyer</button>
+        <button class="pill" data-cat="family">👨‍👩‍👧 Aile</button>
+        <button class="pill" data-cat="growth">🌟 Gelişim</button>
+        <button class="pill" data-cat="surprise">🎁 Sürpriz</button>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Dileğin</label>
+      <textarea id="wishText" rows="4" placeholder="Kalbinden geçeni yaz..."></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>🎥 Video Ekle (İsteğe Bağlı)</label>
+      <input type="file" id="wishVideo" accept="video/*" class="file-input">
+      <div id="videoPreview" class="video-preview hidden"></div>
+    </div>
+    
+    <button id="saveWishBtn" class="btn-magic btn-full">Kavanoza Ekle 🌟</button>
+  </div>
 </div>
 
-<div class="kutu">
-<h2>🔎 Arama</h2>
-
-<input id="aramaInput" oninput="arama()" placeholder="Ara">
-
-<ul id="aramaListe"></ul>
+<!-- 💫 MOTİVASYON MODALI -->
+<div id="motivationModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content motivation-card">
+    <button class="modal-close" id="closeMotivationModal">×</button>
+    <div class="motivation-icon">💫</div>
+    <h2>Sana Özel</h2>
+    <p id="motivationQuote" class="quote-text"></p>
+    <div class="motivation-actions">
+      <button id="speakQuoteBtn" class="btn-secondary">🔊 Sesli Oku</button>
+      <button id="newQuoteBtn" class="btn-magic">Başka Söz</button>
+    </div>
+  </div>
 </div>
 
-<div class="kutu">
-<h2>📊 İstatistik</h2>
-
-<p>Toplam Günlük: <span id="topGunluk">0</span></p>
-
-<p>Toplam Hedef: <span id="topHedef">0</span></p>
-
-<p>Tamamlanan Hedef: <span id="tamamlanan">0</span></p>
+<!-- 🎥 VİDEO LIGHTBOX -->
+<div id="videoLightbox" class="lightbox hidden">
+  <div class="lightbox-overlay"></div>
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="closeLightbox">×</button>
+    <video id="lightboxVideo" controls></video>
+  </div>
 </div>
 
+<!-- ⚙️ AYARLAR MENÜSÜ -->
+<div id="settingsMenu" class="side-menu hidden">
+  <div class="side-menu-overlay" id="settingsOverlay"></div>
+  <div class="side-menu-panel">
+    <div class="side-menu-header">
+      <h3>⚙️ Ayarlar</h3>
+      <button id="closeSettings" class="icon-btn">×</button>
+    </div>
+    
+    <div class="setting-item">
+      <span>🌙 Karanlık Tema</span>
+      <label class="toggle">
+        <input type="checkbox" id="darkToggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    
+    <div class="setting-item">
+      <span>🔔 Günlük Bildirim</span>
+      <label class="toggle">
+        <input type="checkbox" id="notifToggle">
+        <span class="toggle-slider"></span>
+      </label>
+      <small class="setting-hint">Her akşam 21:00'de hatırlatma</small>
+    </div>
+    
+    <div class="setting-item">
+      <span>🔐 PIN Koruması</span>
+      <div id="pinSetupArea"></div>
+    </div>
+    
+    <div class="setting-item">
+      <span>✍️ Kendi Sözlerin</span>
+      <div class="custom-quotes-area">
+        <input type="text" id="newQuoteInput" placeholder="Yeni motivasyon sözü...">
+        <button id="addQuoteBtn" class="btn-small">Ekle</button>
+      </div>
+      <div id="customQuoteList" class="quote-list"></div>
+    </div>
+    
+    <div class="setting-item danger-zone">
+      <button id="exportBtn" class="btn-secondary btn-full">📤 Verileri Dışa Aktar</button>
+      <button id="clearBtn" class="btn-danger btn-full">🗑️ Tüm Dilekleri Sil</button>
+    </div>
+  </div>
 </div>
 
-<script>
-
-let sifre = localStorage.getItem("sifre");
-
-if(!sifre){
-
-sifre = prompt("İlk şifreni belirle");
-
-if(sifre){
-localStorage.setItem("sifre",sifre);
-}
-
-}
-
-function giris(){
-
-let girilen =
-document.getElementById("sifre").value;
-
-if(girilen===sifre){
-
-document.getElementById("loginBox").style.display="none";
-
-document.getElementById("app").classList.remove("hidden");
-
-}
-else{
-
-document.getElementById("hata").innerText=
-"Yanlış şifre";
-
-}
-
-}
-
-let gunlukler =
-JSON.parse(localStorage.getItem("gunlukler")||"[]");
-
-function kaydet(){
-
-let tarih =
-document.getElementById("tarih").value;
-
-let yazi =
-document.getElementById("gunluk").value;
-
-let ruh =
-document.getElementById("ruh").value;
-
-if(tarih==="" || yazi.trim()===""){
-
-alert("Tarih ve günlük gir");
-
-return;
-
-}
-
-gunlukler.push({
-
-tarih:tarih,
-yazi:yazi,
-ruh:ruh
-
-});
-
-localStorage.setItem(
-"gunlukler",
-JSON.stringify(gunlukler)
-);
-
-document.getElementById("gunluk").value="";
-
-istatistik();
-
-alert("Kaydedildi");
-
-}
-
-let hedefler =
-JSON.parse(localStorage.getItem("hedefler")||"[]");
-
-function hedefEkle(){
-
-let hedef =
-document.getElementById("hedefInput").value;
-
-if(hedef.trim()==="") return;
-
-hedefler.push({
-
-isim:hedef,
-tamam:false
-
-});
-
-localStorage.setItem(
-"hedefler",
-JSON.stringify(hedefler)
-);
-
-document.getElementById("hedefInput").value="";
-
-hedefListe();
-
-}
-
-function hedefListe(){
-
-let liste =
-document.getElementById("hedefListe");
-
-liste.innerHTML="";
-
-let tamam=0;
-
-hedefler.forEach((h,i)=>{
-
-if(h.tamam) tamam++;
-
-liste.innerHTML +=
-`<li>
-<input type="checkbox"
-${h.tamam?"checked":""}
-onchange="degistir(${i})">
-${h.isim}
-</li>`;
-
-});
-
-document.getElementById("tamamlanan").innerText=
-tamam;
-
-document.getElementById("topHedef").innerText=
-hedefler.length;
-
-}
-
-function degistir(i){
-
-hedefler[i].tamam =
-!hedefler[i].tamam;
-
-localStorage.setItem(
-"hedefler",
-JSON.stringify(hedefler)
-);
-
-hedefListe();
-
-}
-
-function arama(){
-
-let metin =
-document.getElementById("aramaInput")
-.value.toLowerCase();
-
-let liste =
-document.getElementById("aramaListe");
-
-liste.innerHTML="";
-
-gunlukler.forEach(g=>{
-
-if(
-g.yazi.toLowerCase().includes(metin)
-){
-
-liste.innerHTML +=
-`<li>${g.tarih} - ${g.yazi}</li>`;
-
-}
-
-});
-
-}
-
-function istatistik(){
-
-document.getElementById("topGunluk")
-.innerText =
-gunlukler.length;
-
-}
-
-istatistik();
-hedefListe();
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
-</script>
+<!-- 🎉 KUTLAMA OVERLAY -->
+<div id="celebrationOverlay" class="celebration hidden">
+  <div class="celebration-text">🎉 Dileğin Gerçekleşti! 🎉</div>
+  <div class="confetti"></div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
