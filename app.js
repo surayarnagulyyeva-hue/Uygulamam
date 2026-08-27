@@ -1,149 +1,98 @@
-// ===================== HAYAT DEFTERİ - APP.JS =====================
-
 const STORAGE_KEYS = {
-  entries: 'hd_entries',
-  pin: 'hd_pin',
-  customQuotes: 'hd_custom_quotes',
+  wishes: 'dk_wishes',
+  pin: 'dk_pin',
+  settings: 'dk_settings',
+  customQuotes: 'dk_custom_quotes',
+  firstVisit: 'dk_first_visit'
 };
 
-// ---------- GÜNÜN SORUSU (her gün değişir, tarihe göre sabit) ----------
-const DAILY_QUESTIONS = [
-  "Bugün seni gülümseten neydi?",
-  "Bugün kendine karşı nazik miydin?",
-  "Şu an içinde en çok hangi duygu ağır basıyor?",
-  "Bugün minnettar olduğun küçük bir şey var mı?",
-  "Bugün bir şeyden kaçtın mı, yoksa yüzleştin mi?",
-  "Bugün kendine ne söylemen gerekiyordu?",
-  "Yarın kendine bırakmak istediğin bir not var mı?",
-  "Bugün seni yoran neydi, seni besleyen neydi?",
-  "Şu an vücudun nasıl hissediyor?",
-  "Bugün kimin için minnettarsın?",
-  "Bugün hangi anı tekrar yaşamak isterdin?",
-  "Kendine bugün bir söz verdin mi?",
-  "Bugün neyi bırakmak istiyorsun?",
-  "İçindeki çocuğa bugün ne söylerdin?",
-  "Bugün cesaret gösterdiğin bir an oldu mu?",
-  "Şu an en çok neye ihtiyacın var?",
-  "Bugün seni şaşırtan bir şey oldu mu?",
-  "Kendine bugün nasıl bir arkadaş oldun?",
-  "Bugünden yarına taşımak istediğin ne var?",
-  "Şu an kalbinde ne var?",
+const QUOTES = [
+  "İçindeki ışık, dışarıdaki karanlıktan daha güçlüdür.",
+  "Bugün attığın her adım, yarının haritasını çizer.",
+  "Dilekler sessizce filizlenir, sabırla büyürsün.",
+  "Kendine inanmak, en büyük sihirdir.",
+  "Her yeni gün, yeni bir dilek hakkıdır.",
+  "İçindeki çocuk hâlâ yıldızları sayıyor, onu dinle.",
+  "Sen yeter ki dile, evren nasıl olacağını bilir.",
+  "Küçük bir umut, büyük bir değişimin tohumudur.",
+  "Bugün kendine bir söz ver: Asla vazgeçmeyeceksin.",
+  "Dileklerin kadar güçlüsün, unutma.",
+  "Yıldızlar karanlıkta parlar, sen de öylesin.",
+  "Her zorluğun ardından, daha güçlü bir sen vardır.",
+  "Kendini sevmek, en güzel dileğindir.",
+  "Bugün seni gülümseten bir an yarat.",
+  "İçindeki sessiz sesi duy, o senin gerçek pusulandır.",
+  "Dileklerin sınırsızdır, sınırı sen koyarsın.",
+  "Yarın için endişelenme, bugün için şükret.",
+  "Kendine karşı nazik ol, en değerli hazin sensin.",
+  "Her nefes yeni bir başlangıçtır.",
+  "Dilek tutmak cesaret ister, sen cesursun.",
+  "Parlamak zorunda değilsin, sadece ışık ol yeter.",
+  "Bugün kendine: 'Yeterince iyiyim' de.",
+  "Küçük adımlar, devasa yolculuklara çıkar.",
+  "İçindeki umut, dışarıdaki fırtınadan büyüktür.",
+  "Sen bir kavanoz değilsin, bir galaksisin.",
 ];
 
-function getDailyQuestion() {
-  const start = new Date(new Date().getFullYear(), 0, 0);
-  const diff = new Date() - start;
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return DAILY_QUESTIONS[dayOfYear % DAILY_QUESTIONS.length];
+const CATEGORY_LABELS = {
+  love: '💕 Aşk',
+  money: '💰 Para',
+  health: '🏥 Sağlık',
+  career: '🚀 Kariyer',
+  family: '👨‍👩‍👧 Aile',
+  growth: '🌟 Gelişim',
+  surprise: '🎁 Sürpriz'
+};
+
+let wishes = [];
+let selectedCategory = null;
+let currentVideoBase64 = null;
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.wishes);
+    wishes = raw ? JSON.parse(raw) : [];
+  } catch (e) { wishes = []; }
 }
 
-// ---------- MANİFESTO SÖZLERİ (ruh haline göre + genel havuz) ----------
-const QUOTES = {
-  mutlu: [
-    "Bu sevinci kaydettin, artık o senin bir parçan.",
-    "Gülüşünün izini bıraktın bugün buraya. Güzel iş.",
-    "Mutluluk anları biriktirmeye devam et, bu bir hazine.",
-  ],
-  huzurlu: [
-    "Sakinlik de bir başarıdır. Bugün onu yakaladın.",
-    "İçindeki dinginliği fark ettin. Bu az şey değil.",
-    "Huzur, gürültüsüz bir zaferdir. Bugünkü zaferin kutlu olsun.",
-  ],
-  yorgun: [
-    "Yorgunluğun da bir emeğin izidir. Kendine iyi bak.",
-    "Bugün dinlenmeyi hak ettin. Yarın yine buradayız.",
-    "Bitkinlik geçicidir, çabaların kalıcı. Şimdi biraz nefes al.",
-  ],
-  uzgun: [
-    "Bugünü yazdın, bu bile cesaret ister. Yalnız değilsin.",
-    "Üzüntü de geçer, ama onu görmezden gelmedin. Bu güçlü bir şey.",
-    "Zor günler de defterine yazılmayı hak eder. Sen değerlisin.",
-  ],
-  kararsiz: [
-    "Kararsızlık bir duraktır, son durak değil. Zamanla netleşecek.",
-    "Bugün net olmasan da, yazdığın her satır bir adım.",
-    "Belirsizlikte bile ilerliyorsun, bunu unutma.",
-  ],
-  kizgin: [
-    "Öfkeni buraya bıraktın, üzerinde taşımana gerek yok artık.",
-    "Kızgınlık da bir haber taşır; onu duyduğun için teşekkürler.",
-    "Bugün zorlandın ama yazmayı bıraktın. Bu, kendine saygıdır.",
-  ],
-  umutlu: [
-    "Umut ektin bugün, filizlenmesini izleyeceksin.",
-    "Küçük bir umut, büyük bir yarının tohumu olabilir.",
-    "İçindeki o yeşil ışığı koru, sana yol gösterecek.",
-  ],
-  genel: [
-    "Bugünü yazdın, yarına bir sayfa daha açtın.",
-    "Her satır, kendine tuttuğun bir aynadır.",
-    "Yazdığın her söz, geleceğe bıraktığın bir iz.",
-    "Bugün de kendinle buluştun. Bu küçük bir ritüel, büyük bir anlam taşıyor.",
-    "Defterin sessizce dinledi, sen de kendini duydun.",
-    "Bir gün daha kayıt altına alındı. Hikayen büyümeye devam ediyor.",
-    "Kelimelerin bugün bir yuva buldu.",
-    "Bu sayfa kapandı, ama hikayenin devamı var.",
-    "Kendine ayırdığın bu birkaç dakika, aslında kendine bir hediyeydi.",
-    "Yazmak, kendini hatırlamanın en sessiz yoludur.",
-  ],
-};
+function saveData() {
+  localStorage.setItem(STORAGE_KEYS.wishes, JSON.stringify(wishes));
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.settings);
+    return raw ? JSON.parse(raw) : { darkMode: true, notifications: false };
+  } catch (e) { return { darkMode: true, notifications: false }; }
+}
+
+function saveSettings(s) {
+  localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(s));
+}
 
 function loadCustomQuotes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.customQuotes);
     return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
+  } catch (e) { return []; }
 }
 
 function saveCustomQuotes(list) {
   localStorage.setItem(STORAGE_KEYS.customQuotes, JSON.stringify(list));
 }
 
-function pickQuote(mood) {
-  const defaultPool = (mood && QUOTES[mood]) ? QUOTES[mood].concat(QUOTES.genel) : QUOTES.genel;
-  const custom = loadCustomQuotes();
-  // kendi sözlerin varsa havuza karışır; eklemediysen sadece bizim sözlerimiz kullanılır
-  const pool = custom.length > 0 ? defaultPool.concat(custom) : defaultPool;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-// ---------- STATE ----------
-let entries = [];
-let selectedMood = null;
-
-// ---------- YARDIMCI FONKSİYONLAR ----------
-function loadEntries() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.entries);
-    entries = raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    entries = [];
-  }
-}
-
-function saveEntries() {
-  localStorage.setItem(STORAGE_KEYS.entries, JSON.stringify(entries));
-}
-
-function formatDateLong(d) {
-  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
-}
-
-function formatDateShort(iso) {
+function formatDate(iso) {
   const d = new Date(iso);
-  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function todayKey() {
-  const d = new Date();
-  return d.toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10);
 }
 
 function calcStreak() {
-  if (entries.length === 0) return 0;
-  const days = new Set(entries.map(e => e.date.slice(0, 10)));
+  if (wishes.length === 0) return 0;
+  const days = new Set(wishes.map(w => w.date.slice(0, 10)));
   let streak = 0;
   let cursor = new Date();
   while (true) {
@@ -151,176 +100,9 @@ function calcStreak() {
     if (days.has(key)) {
       streak++;
       cursor.setDate(cursor.getDate() - 1);
-    } else {
-      break;
-    }
+    } else break;
   }
   return streak;
-}
-
-// ---------- KİLİT EKRANI ----------
-function initLock() {
-  const savedPin = localStorage.getItem(STORAGE_KEYS.pin);
-  if (!savedPin) {
-    showApp();
-    return;
-  }
-  document.getElementById('lockScreen').classList.remove('hidden');
-  document.getElementById('pinSubmit').addEventListener('click', tryUnlock);
-  document.getElementById('pinInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') tryUnlock();
-  });
-}
-
-function tryUnlock() {
-  const savedPin = localStorage.getItem(STORAGE_KEYS.pin);
-  const input = document.getElementById('pinInput').value;
-  if (input === savedPin) {
-    document.getElementById('lockScreen').classList.add('hidden');
-    showApp();
-  } else {
-    document.getElementById('pinError').classList.remove('hidden');
-    document.getElementById('pinInput').value = '';
-  }
-}
-
-function showApp() {
-  document.getElementById('app').classList.remove('hidden');
-  document.getElementById('todayDate').textContent = formatDateLong(new Date());
-  renderStreak();
-  renderHistory();
-  renderStats();
-  renderPinSetup();
-  renderCustomQuotes();
-  document.getElementById('dailyQuestion').textContent = getDailyQuestion();
-}
-
-// ---------- SEKMELER ----------
-function initTabs() {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    });
-  });
-}
-
-// ---------- RUH HALİ SEÇİMİ ----------
-function initMoodPicker() {
-  document.querySelectorAll('.mood-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedMood = btn.dataset.mood;
-    });
-  });
-}
-
-// ---------- GÜNLÜK KAYDETME ----------
-function initSave() {
-  document.getElementById('saveEntryBtn').addEventListener('click', () => {
-    const textEl = document.getElementById('entryText');
-    const goalEl = document.getElementById('goalInput');
-    const text = textEl.value.trim();
-
-    if (!text) {
-      textEl.focus();
-      textEl.style.borderColor = '#E17D61';
-      setTimeout(() => { textEl.style.borderColor = ''; }, 800);
-      return;
-    }
-
-    const entry = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      mood: selectedMood,
-      text: text,
-      goal: goalEl.value.trim(),
-    };
-
-    entries.unshift(entry);
-    saveEntries();
-
-    // formu temizle
-    textEl.value = '';
-    goalEl.value = '';
-    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
-    selectedMood = null;
-
-    renderStreak();
-    renderHistory();
-    renderStats();
-    showManifesto(entry.mood);
-  });
-}
-
-// ---------- MANİFESTO KARTI ----------
-function showManifesto(mood) {
-  const quote = pickQuote(mood);
-  document.getElementById('manifestoQuote').textContent = quote;
-  document.getElementById('manifestoOverlay').classList.remove('hidden');
-}
-
-function initManifestoClose() {
-  document.getElementById('manifestoClose').addEventListener('click', () => {
-    document.getElementById('manifestoOverlay').classList.add('hidden');
-  });
-}
-
-// ---------- STREAK GÖRÜNÜMÜ ----------
-function renderStreak() {
-  document.getElementById('streakCount').textContent = calcStreak();
-}
-
-// ---------- GEÇMİŞ LİSTESİ ----------
-const MOOD_EMOJI = {
-  mutlu: '😊', huzurlu: '😌', yorgun: '😴', uzgun: '😔',
-  kararsiz: '😐', kizgin: '😤', umutlu: '🌱',
-};
-
-function renderHistory(filter = '') {
-  const list = document.getElementById('historyList');
-  const empty = document.getElementById('emptyHistory');
-  list.innerHTML = '';
-
-  const filtered = entries.filter(e =>
-    e.text.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  if (filtered.length === 0) {
-    empty.classList.remove('hidden');
-    return;
-  }
-  empty.classList.add('hidden');
-
-  filtered.forEach(entry => {
-    const item = document.createElement('div');
-    item.className = 'history-item';
-    item.innerHTML = `
-      <div class="history-item-top">
-        <span class="history-date">${formatDateShort(entry.date)}</span>
-        <span class="history-mood">${MOOD_EMOJI[entry.mood] || '📝'}</span>
-      </div>
-      ${entry.goal ? `<div class="history-goal">🎯 ${escapeHtml(entry.goal)}</div>` : ''}
-      <p class="history-text">${escapeHtml(entry.text)}</p>
-      <div class="history-actions">
-        <button class="delete-btn" data-id="${entry.id}">Sil</button>
-      </div>
-    `;
-    list.appendChild(item);
-  });
-
-  list.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      entries = entries.filter(e => e.id !== btn.dataset.id);
-      saveEntries();
-      renderHistory(document.getElementById('searchInput').value);
-      renderStreak();
-      renderStats();
-    });
-  });
 }
 
 function escapeHtml(str) {
@@ -329,41 +111,363 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function initSearch() {
-  document.getElementById('searchInput').addEventListener('input', (e) => {
-    renderHistory(e.target.value);
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function initWelcome() {
+  const visited = localStorage.getItem(STORAGE_KEYS.firstVisit);
+  if (visited) {
+    checkLock();
+    return;
+  }
+  document.getElementById('startBtn').addEventListener('click', () => {
+    localStorage.setItem(STORAGE_KEYS.firstVisit, 'true');
+    checkLock();
   });
 }
 
-// ---------- İSTATİSTİKLER ----------
+function checkLock() {
+  const savedPin = localStorage.getItem(STORAGE_KEYS.pin);
+  if (savedPin) {
+    showScreen('lockScreen');
+    initLock();
+  } else {
+    showApp();
+  }
+}
+
+function initLock() {
+  const input = document.getElementById('pinInput');
+  const btn = document.getElementById('pinSubmit');
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') tryUnlock();
+  });
+  input.focus();
+}
+
+function tryUnlock() {
+  const savedPin = localStorage.getItem(STORAGE_KEYS.pin);
+  const input = document.getElementById('pinInput').value;
+  if (input === savedPin) {
+    showApp();
+  } else {
+    document.getElementById('pinError').classList.remove('hidden');
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinInput').focus();
+  }
+}
+
+function showApp() {
+  showScreen('app');
+  renderStats();
+  renderWishes();
+  initMenu();
+  initWishModal();
+  initMotivationModal();
+  initVideoLightbox();
+  initLuckyStar();
+  initSettings();
+  initNotifications();
+  if (Math.random() > 0.7 && wishes.length > 0) {
+    showLuckyStar();
+  }
+}
+
 function renderStats() {
-  const grid = document.getElementById('statsGrid');
-  const total = entries.length;
-  const streak = calcStreak();
-  const moodCounts = {};
-  entries.forEach(e => { moodCounts[e.mood] = (moodCounts[e.mood] || 0) + 1; });
-  let topMood = '-';
-  let topCount = 0;
-  Object.keys(moodCounts).forEach(m => {
-    if (moodCounts[m] > topCount) { topCount = moodCounts[m]; topMood = MOOD_EMOJI[m] || m; }
-  });
-
-  grid.innerHTML = `
-    <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-label">Toplam Sayfa</div></div>
-    <div class="stat-box"><div class="stat-num">${streak}</div><div class="stat-label">Güncel Seri</div></div>
-    <div class="stat-box"><div class="stat-num">${topMood}</div><div class="stat-label">Sık Ruh Hali</div></div>
-    <div class="stat-box"><div class="stat-num">${entries.filter(e => e.goal).length}</div><div class="stat-label">Belirlenen Hedef</div></div>
-  `;
+  document.getElementById('statTotal').textContent = wishes.length;
+  document.getElementById('statDone').textContent = wishes.filter(w => w.completed).length;
+  document.getElementById('statStreak').textContent = calcStreak();
 }
 
-// ---------- PIN AYARLARI ----------
+function renderWishes(filter = 'all') {
+  const list = document.getElementById('wishList');
+  const empty = document.getElementById('emptyWishes');
+  list.innerHTML = '';
+  let filtered = wishes;
+  if (filter !== 'all') {
+    filtered = wishes.filter(w => w.category === filter);
+  }
+  filtered = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (filtered.length === 0) {
+    empty.classList.remove('hidden');
+    list.classList.add('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  list.classList.remove('hidden');
+  filtered.forEach(wish => {
+    const card = document.createElement('div');
+    card.className = 'wish-card' + (wish.completed ? ' completed' : '');
+    const catLabel = CATEGORY_LABELS[wish.category] || '📝 Diğer';
+    const catClass = 'cat-' + (wish.category || 'surprise');
+    let videoHtml = '';
+    if (wish.video) {
+      videoHtml = `<span class="video-badge" data-id="${wish.id}">🎥 Videoyu İzle</span>`;
+    }
+    card.innerHTML = `
+      <div class="wish-card-header">
+        <span class="wish-category ${catClass}">${catLabel}</span>
+        <span class="wish-date">${formatDate(wish.date)}</span>
+      </div>
+      <p class="wish-text">${escapeHtml(wish.text)}</p>
+      <div class="wish-actions">
+        ${videoHtml}
+        <button class="btn-done" data-id="${wish.id}">${wish.completed ? '⭐ Gerçekleşti' : '✨ Gerçekleşti'}</button>
+        <button class="btn-delete" data-id="${wish.id}">🗑️ Sil</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+  list.querySelectorAll('.btn-done').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const wish = wishes.find(w => w.id === id);
+      if (wish) {
+        wish.completed = !wish.completed;
+        if (wish.completed) {
+          wish.completedDate = new Date().toISOString();
+          showCelebration();
+        } else {
+          wish.completedDate = null;
+        }
+        saveData();
+        renderWishes(document.getElementById('categoryFilter').value);
+        renderStats();
+      }
+    });
+  });
+  list.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (confirm('Bu dileği kavanozundan çıkarıyorsun. Emin misin?')) {
+        wishes = wishes.filter(w => w.id !== btn.dataset.id);
+        saveData();
+        renderWishes(document.getElementById('categoryFilter').value);
+        renderStats();
+      }
+    });
+  });
+  list.querySelectorAll('.video-badge').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wish = wishes.find(w => w.id === btn.dataset.id);
+      if (wish && wish.video) {
+        openVideoLightbox(wish.video);
+      }
+    });
+  });
+}
+
+function initCategoryFilter() {
+  document.getElementById('categoryFilter').addEventListener('change', (e) => {
+    renderWishes(e.target.value);
+  });
+}
+
+function initWishModal() {
+  const modal = document.getElementById('wishModal');
+  const btn = document.getElementById('wishBtn');
+  const close = document.getElementById('closeWishModal');
+  const save = document.getElementById('saveWishBtn');
+  const overlay = modal.querySelector('.modal-overlay');
+  btn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    selectedCategory = null;
+    currentVideoBase64 = null;
+    document.getElementById('wishText').value = '';
+    document.getElementById('wishVideo').value = '';
+    document.getElementById('videoPreview').classList.add('hidden');
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+  });
+  close.addEventListener('click', () => modal.classList.add('hidden'));
+  overlay.addEventListener('click', () => modal.classList.add('hidden'));
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+      selectedCategory = pill.dataset.cat;
+    });
+  });
+  document.getElementById('wishVideo').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Video 5MB'dan küçük olmalı. Daha küçük bir video seç.");
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      currentVideoBase64 = ev.target.result;
+      const preview = document.getElementById('videoPreview');
+      preview.innerHTML = `<video src="${currentVideoBase64}" controls></video>`;
+      preview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  });
+  save.addEventListener('click', () => {
+    const text = document.getElementById('wishText').value.trim();
+    if (!text) {
+      document.getElementById('wishText').focus();
+      document.getElementById('wishText').style.borderColor = '#ef4444';
+      setTimeout(() => document.getElementById('wishText').style.borderColor = '', 800);
+      return;
+    }
+    if (!selectedCategory) selectedCategory = 'surprise';
+    const wish = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      text: text,
+      category: selectedCategory,
+      video: currentVideoBase64,
+      completed: false,
+      completedDate: null
+    };
+    wishes.unshift(wish);
+    saveData();
+    modal.classList.add('hidden');
+    renderWishes(document.getElementById('categoryFilter').value);
+    renderStats();
+    showMiniCelebration();
+  });
+}
+
+function initMotivationModal() {
+  const modal = document.getElementById('motivationModal');
+  const btn = document.getElementById('motivationBtn');
+  const close = document.getElementById('closeMotivationModal');
+  const overlay = modal.querySelector('.modal-overlay');
+  const newQuote = document.getElementById('newQuoteBtn');
+  const speak = document.getElementById('speakQuoteBtn');
+  btn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    showRandomQuote();
+  });
+  close.addEventListener('click', () => modal.classList.add('hidden'));
+  overlay.addEventListener('click', () => modal.classList.add('hidden'));
+  newQuote.addEventListener('click', showRandomQuote);
+  speak.addEventListener('click', () => {
+    const text = document.getElementById('motivationQuote').textContent;
+    if ('speechSynthesis' in window) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'tr-TR';
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    } else {
+      alert('Tarayıcın sesli okumayı desteklemiyor.');
+    }
+  });
+}
+
+function showRandomQuote() {
+  const custom = loadCustomQuotes();
+  const pool = custom.length > 0 ? QUOTES.concat(custom) : QUOTES;
+  const quote = pool[Math.floor(Math.random() * pool.length)];
+  document.getElementById('motivationQuote').textContent = quote;
+}
+
+function initVideoLightbox() {
+  const lightbox = document.getElementById('videoLightbox');
+  document.getElementById('closeLightbox').addEventListener('click', () => {
+    lightbox.classList.add('hidden');
+    document.getElementById('lightboxVideo').pause();
+  });
+  lightbox.querySelector('.lightbox-overlay').addEventListener('click', () => {
+    lightbox.classList.add('hidden');
+    document.getElementById('lightboxVideo').pause();
+  });
+}
+
+function openVideoLightbox(base64) {
+  const lightbox = document.getElementById('videoLightbox');
+  const video = document.getElementById('lightboxVideo');
+  video.src = base64;
+  lightbox.classList.remove('hidden');
+  video.play();
+}
+
+function initLuckyStar() {
+  document.getElementById('luckyStarBtn').addEventListener('click', showLuckyStar);
+  document.getElementById('luckyClose').addEventListener('click', () => {
+    document.getElementById('luckyStarCard').classList.add('hidden');
+  });
+}
+
+function showLuckyStar() {
+  if (wishes.length === 0) return;
+  const wish = wishes[Math.floor(Math.random() * wishes.length)];
+  const card = document.getElementById('luckyStarCard');
+  document.getElementById('luckyText').textContent = wish.text;
+  card.classList.remove('hidden');
+}
+
+function showCelebration() {
+  const overlay = document.getElementById('celebrationOverlay');
+  overlay.classList.remove('hidden');
+  setTimeout(() => overlay.classList.add('hidden'), 2500);
+}
+
+function showMiniCelebration() {
+  const btn = document.getElementById('wishBtn');
+  btn.style.transform = 'scale(1.05)';
+  btn.style.boxShadow = '0 0 30px rgba(255,215,0,0.5)';
+  setTimeout(() => {
+    btn.style.transform = '';
+    btn.style.boxShadow = '';
+  }, 600);
+}
+
+function initMenu() {
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('settingsMenu').classList.remove('hidden');
+  });
+}
+
+function initSettings() {
+  const menu = document.getElementById('settingsMenu');
+  const overlay = document.getElementById('settingsOverlay');
+  const close = document.getElementById('closeSettings');
+  close.addEventListener('click', () => menu.classList.add('hidden'));
+  overlay.addEventListener('click', () => menu.classList.add('hidden'));
+  const settings = loadSettings();
+  document.getElementById('darkToggle').checked = settings.darkMode;
+  document.getElementById('darkToggle').addEventListener('change', (e) => {
+    settings.darkMode = e.target.checked;
+    saveSettings(settings);
+  });
+  document.getElementById('notifToggle').checked = settings.notifications;
+  document.getElementById('notifToggle').addEventListener('change', (e) => {
+    settings.notifications = e.target.checked;
+    saveSettings(settings);
+    if (settings.notifications) {
+      requestNotificationPermission();
+    }
+  });
+  renderPinSetup();
+  renderCustomQuotes();
+  document.getElementById('addQuoteBtn').addEventListener('click', addCustomQuote);
+  document.getElementById('newQuoteInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addCustomQuote();
+  });
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (confirm('TÜM dileklerini silmek üzeresin. Bu geri alınamaz! Emin misin?')) {
+      wishes = [];
+      saveData();
+      renderWishes();
+      renderStats();
+      menu.classList.add('hidden');
+    }
+  });
+}
+
 function renderPinSetup() {
   const area = document.getElementById('pinSetupArea');
   const savedPin = localStorage.getItem(STORAGE_KEYS.pin);
-
   if (savedPin) {
     area.innerHTML = `
-      <button id="removePinBtn" class="btn-secondary btn-full">PIN Korumasını Kaldır</button>
+      <button id="removePinBtn" class="btn-secondary btn-full" style="margin-top:0.5rem">🔓 PIN Korumasını Kaldır</button>
     `;
     document.getElementById('removePinBtn').addEventListener('click', () => {
       localStorage.removeItem(STORAGE_KEYS.pin);
@@ -371,39 +475,37 @@ function renderPinSetup() {
     });
   } else {
     area.innerHTML = `
-      <input type="password" id="newPinInput" inputmode="numeric" maxlength="6" placeholder="4-6 haneli PIN belirle">
-      <button id="setPinBtn" class="btn-primary btn-full">PIN Belirle</button>
+      <input type="password" id="newPinInput" inputmode="numeric" maxlength="6" placeholder="4-6 haneli PIN">
+      <button id="setPinBtn" class="btn-magic btn-full" style="margin-top:0.5rem">🔐 PIN Belirle</button>
     `;
     document.getElementById('setPinBtn').addEventListener('click', () => {
       const val = document.getElementById('newPinInput').value.trim();
       if (val.length >= 4) {
         localStorage.setItem(STORAGE_KEYS.pin, val);
         renderPinSetup();
+      } else {
+        alert('PIN en az 4 haneli olmalı.');
       }
     });
   }
 }
 
-// ---------- KENDİ MOTİVE EDİCİ SÖZLERİN ----------
 function renderCustomQuotes() {
   const list = document.getElementById('customQuoteList');
   const quotes = loadCustomQuotes();
-
   if (quotes.length === 0) {
-    list.innerHTML = `<p class="custom-quote-empty">Henüz kendi sözünü eklemedin. Bizim sözlerimiz kullanılıyor.</p>`;
+    list.innerHTML = `<p style="color:var(--text-secondary);font-size:0.85rem">Henüz kendi sözünü eklemedin.</p>`;
     return;
   }
-
   list.innerHTML = quotes.map((q, i) => `
-    <div class="custom-quote-item">
-      <p>"${escapeHtml(q)}"</p>
-      <button class="remove-quote-btn" data-index="${i}">Sil</button>
+    <div class="quote-item">
+      <span>"${escapeHtml(q)}"</span>
+      <button data-index="${i}">Sil</button>
     </div>
   `).join('');
-
-  list.querySelectorAll('.remove-quote-btn').forEach(btn => {
+  list.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.index, 10);
+      const idx = parseInt(btn.dataset.index);
       const updated = loadCustomQuotes();
       updated.splice(idx, 1);
       saveCustomQuotes(updated);
@@ -412,55 +514,77 @@ function renderCustomQuotes() {
   });
 }
 
-function initCustomQuotes() {
-  document.getElementById('addQuoteBtn').addEventListener('click', () => {
-    const input = document.getElementById('newQuoteInput');
-    const val = input.value.trim();
-    if (!val) return;
-    const quotes = loadCustomQuotes();
-    quotes.push(val);
-    saveCustomQuotes(quotes);
-    input.value = '';
-    renderCustomQuotes();
-  });
-  document.getElementById('newQuoteInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('addQuoteBtn').click();
-  });
+function addCustomQuote() {
+  const input = document.getElementById('newQuoteInput');
+  const val = input.value.trim();
+  if (!val) return;
+  const quotes = loadCustomQuotes();
+  quotes.push(val);
+  saveCustomQuotes(quotes);
+  input.value = '';
+  renderCustomQuotes();
 }
 
-// ---------- DIŞA AKTARMA ----------
-function initExport() {
-  document.getElementById('exportBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `hayat-defteri-${todayKey()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+function exportData() {
+  const data = {
+    wishes: wishes,
+    exportedAt: new Date().toISOString(),
+    app: 'Dilek Kavanozu'
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `dilek-kavanozu-${todayKey()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-// ---------- BAŞLAT ----------
-document.addEventListener('DOMContentLoaded', () => {
-  loadEntries();
-  initLock();
-  initTabs();
-  initMoodPicker();
-  initSave();
-  initManifestoClose();
-  initSearch();
-  initExport();
-  initCustomQuotes();
-
-  if (!localStorage.getItem(STORAGE_KEYS.pin)) {
-    // kilit yoksa direkt açılacak zaten initLock içinde
+function initNotifications() {
+  const settings = loadSettings();
+  if (settings.notifications) {
+    requestNotificationPermission();
   }
+  setInterval(checkDailyReminder, 60000);
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function checkDailyReminder() {
+  const settings = loadSettings();
+  if (!settings.notifications) return;
+  const now = new Date();
+  if (now.getHours() === 21 && now.getMinutes() === 0) {
+    const todayWishes = wishes.filter(w => w.date.startsWith(todayKey()));
+    if (todayWishes.length === 0) {
+      sendNotification('Dilek Kavanozu', 'Bugün henüz bir dilek tutmadın. Yıldızlar seni bekliyor ✨');
+    }
+  }
+}
+
+function sendNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body: body,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png'
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  initWelcome();
+  initCategoryFilter();
 });
 
-// ---------- SERVICE WORKER ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+
