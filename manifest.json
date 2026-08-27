@@ -1,13 +1,11 @@
-
-  
 {
-  "name": "LifeDiary",
-  "short_name": "Defter",
-  "description": "Günlük notlar ve yaşam kayıtları uygulaması",
+  "name": "Dilek Kavanozu",
+  "short_name": "Kavanoz",
+  "description": "Dileklerini yıldızlara gönder, sadece sen ve kavanozun.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#0f0c29",
+  "theme_color": "#0f0c29",
   "orientation": "portrait",
   "icons": [
     {
@@ -27,7 +25,7 @@
       "sizes": "711x1310",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Defter Uygulaması Mobil Görünümü"
+      "label": "Dilek Kavanozu Mobil Görünümü"
     }
   ]
 }
