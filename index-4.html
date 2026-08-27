@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFF8F0">
+<title>Hayat Defteri</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Comfortaa:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+  <!-- PIN KİLİDİ -->
+  <div id="lockScreen" class="lock-screen hidden">
+    <div class="lock-card">
+      <div class="lock-icon">🔒</div>
+      <h2>Hayat Defterim</h2>
+      <p class="lock-sub">Bu sayfalar sadece sana ait.</p>
+      <input type="password" id="pinInput" inputmode="numeric" maxlength="6" placeholder="PIN" autocomplete="off">
+      <button id="pinSubmit" class="btn-primary">Aç</button>
+      <p id="pinError" class="pin-error hidden">Yanlış PIN, tekrar dene.</p>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+
+    <!-- ÜST BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Hayat Defteri</h1>
+        <p id="todayDate" class="today-date"></p>
+      </div>
+      <div class="streak-badge" id="streakBadge">
+        <span class="streak-flame">🔥</span>
+        <span id="streakCount">0</span>
+      </div>
+    </header>
+
+    <!-- SEKME GEÇİŞİ -->
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="today">Bugün</button>
+      <button class="tab-btn" data-tab="history">Geçmiş</button>
+      <button class="tab-btn" data-tab="settings">Ayarlar</button>
+    </nav>
+
+    <!-- BUGÜN SEKMESİ -->
+    <section id="tab-today" class="tab-panel active">
+      <div class="card question-card">
+        <p class="question-label">Günün Sorusu</p>
+        <p id="dailyQuestion" class="daily-question"></p>
+      </div>
+      <div class="card write-card">
+        <p class="prompt-label">Bugün ruh halin nasıl?</p>
+        <div class="mood-row" id="moodRow">
+          <button class="mood-btn" data-mood="mutlu">😊<span>Mutlu</span></button>
+          <button class="mood-btn" data-mood="huzurlu">😌<span>Huzurlu</span></button>
+          <button class="mood-btn" data-mood="yorgun">😴<span>Yorgun</span></button>
+          <button class="mood-btn" data-mood="uzgun">😔<span>Üzgün</span></button>
+          <button class="mood-btn" data-mood="kararsiz">😐<span>Kararsız</span></button>
+          <button class="mood-btn" data-mood="kizgin">😤<span>Kızgın</span></button>
+          <button class="mood-btn" data-mood="umutlu">🌱<span>Umutlu</span></button>
+        </div>
+
+        <textarea id="entryText" placeholder="Bugün aklından ne geçti? Ne yaşadın, ne hissettin..." rows="7"></textarea>
+
+        <div class="goal-row">
+          <input type="text" id="goalInput" placeholder="Bugün için küçük bir hedef (isteğe bağlı)">
+        </div>
+
+        <button id="saveEntryBtn" class="btn-primary btn-full">Sayfayı Kapat ✍️</button>
+      </div>
+    </section>
+
+    <!-- GEÇMİŞ SEKMESİ -->
+    <section id="tab-history" class="tab-panel">
+      <div class="history-toolbar">
+        <input type="text" id="searchInput" placeholder="Günlüklerinde ara...">
+      </div>
+      <div id="historyList" class="history-list"></div>
+      <p id="emptyHistory" class="empty-state hidden">Henüz bir sayfa yazılmamış. Bugün ilk sayfanı aç.</p>
+    </section>
+
+    <!-- AYARLAR SEKMESİ -->
+    <section id="tab-settings" class="tab-panel">
+      <div class="card">
+        <h3>Gizlilik</h3>
+        <p class="settings-desc">Defterine bir PIN koyarak sadece senin açabilmeni sağla.</p>
+        <div id="pinSetupArea"></div>
+      </div>
+      <div class="card">
+        <h3>Motive Edici Sözlerin</h3>
+        <p class="settings-desc">Günlüğü yazdıktan sonra çıkan sözü kendin yazmak istersen buraya ekle. Hiç eklemezsen, bizim özgün sözlerimiz gösterilmeye devam eder.</p>
+        <div class="custom-quote-input">
+          <input type="text" id="newQuoteInput" placeholder="Kendine bırakmak istediğin bir söz...">
+          <button id="addQuoteBtn" class="btn-primary">Ekle</button>
+        </div>
+        <div id="customQuoteList" class="custom-quote-list"></div>
+      </div>
+      <div class="card">
+        <h3>Yedekleme</h3>
+        <p class="settings-desc">Tüm günlüklerini bir dosya olarak indir.</p>
+        <button id="exportBtn" class="btn-secondary btn-full">Dışa Aktar (JSON)</button>
+      </div>
+      <div class="card">
+        <h3>İstatistikler</h3>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- MANİFESTO KARTI -->
+  <div id="manifestoOverlay" class="manifesto-overlay hidden">
+    <div class="manifesto-card">
+      <div class="manifesto-seal">✒️</div>
+      <p class="manifesto-quote" id="manifestoQuote"></p>
+      <div class="manifesto-line"></div>
+      <p class="manifesto-sub">— Hayat Defterin</p>
+      <button id="manifestoClose" class="btn-primary">Teşekkürler</button>
+    </div>
+  </div>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>
