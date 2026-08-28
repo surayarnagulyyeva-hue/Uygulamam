@@ -18,14 +18,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshots/mobil.jpg",
-      "sizes": "711x1310",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Dilek Kavanozu Mobil Görünümü"
-    }
   ]
 }

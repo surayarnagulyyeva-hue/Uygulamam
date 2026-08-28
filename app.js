@@ -70,6 +70,10 @@ function saveSettings(s) {
   localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(s));
 }
 
+function applyTheme(settings) {
+  document.body.classList.toggle('light-theme', !settings.darkMode);
+}
+
 function loadCustomQuotes() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.customQuotes);
@@ -161,6 +165,7 @@ function tryUnlock() {
 }
 
 function showApp() {
+  applyTheme(loadSettings());
   showScreen('app');
   renderStats();
   renderWishes();
@@ -324,8 +329,14 @@ function initWishModal() {
       completed: false,
       completedDate: null
     };
-    wishes.unshift(wish);
-    saveData();
+    try {
+      wishes.unshift(wish);
+      saveData();
+    } catch (e) {
+      wishes.shift();
+      alert('Video kaydedilemedi, hafıza dolu olabilir. Daha kısa bir video dene veya videosuz kaydet.');
+      return;
+    }
     modal.classList.add('hidden');
     renderWishes(document.getElementById('categoryFilter').value);
     renderStats();
@@ -435,6 +446,7 @@ function initSettings() {
   document.getElementById('darkToggle').addEventListener('change', (e) => {
     settings.darkMode = e.target.checked;
     saveSettings(settings);
+    applyTheme(settings);
   });
   document.getElementById('notifToggle').checked = settings.notifications;
   document.getElementById('notifToggle').addEventListener('change', (e) => {
@@ -587,4 +599,3 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
-
