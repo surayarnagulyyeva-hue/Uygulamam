@@ -1,9 +1,9 @@
-const CACHE_NAME = 'dilek-kavanozu-v2';
+const CACHE_NAME = 'dilek-kavanozu-v3';
 const urlsToCache = [
   './',
   './index.html',
-  './style-5.css',
-  './app.js',
+  './stil-5.css',
+  './uygulama.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
